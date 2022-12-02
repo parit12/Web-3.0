@@ -14,10 +14,10 @@ const getEthereumcontract = () => {
 }
 
 export const TransactionProvider = ({ children }) => {
-    const [transcationCount, setTransactionCount] = React.useState(localStorage.getItem('transactionCount'));
+    const [transactionCount, setTransactionCount] = React.useState(localStorage.getItem('transactionCount'));
     const [isLoading, setIsLoading] = React.useState(false);
-    const [connectAccount, setConnectedAccount] = React.useState('');
-    const [currentAccount, setCurrentAccount] = useState("");
+    // const [connectAccount, setConnectedAccount] = React.useState('');
+    const [currentAccount, setCurrentAccount] = useState('');
     const [formData, setFormData] = React.useState({ addressTo: '', amount: ' ', keyword: ' ', message: ' ' });
     const handlechange = (e, name) => {
         setFormData((prevState) => ({ ...prevState, [name]: e.target.value }));
@@ -53,29 +53,33 @@ export const TransactionProvider = ({ children }) => {
             if (!ethereum) {
                 alert('install meta mask');
             }
+
             const { addressTo, amount, keyword, message } = formData;
-            const TranscationContract = getEthereumcontract();
+            const transactionContract = getEthereumcontract();
             const parsedAmount = ethers.utils.parseEther(amount);
+            console.log('hf');
             await ethereum.request({
-                methord: 'sendTransaction',
+                method: 'eth_sendTransaction',
                 params: [{
                     from: currentAccount,
                     to: addressTo,
                     gas: '0x5028',
                     value: parsedAmount._hex,
                 }]
-            })
-
+            });
+            console.log('chal arha hai a');
             const transactionHash = await transactionContract.addToBlockchain(adddressTo, parsedAmount, message, amount);
 
             setIsLoading(true);
-            console.log('loading -${transactionHash}');
+            console.log('loading -${transactionHash.hash}');
+            await transactionHash.wait();
             setIsLoading(false);
-            console.log('sucess ${transactionHash}');
+            console.log('sucess ${transactionHash.hash}');
             const transactionCount = transactionContract.getTranscationCount();
 
             setTransactionCount(transactionCount.toNumber());
         } catch (error) {
+            console.log('here');
             console.log(error);
         }
 
